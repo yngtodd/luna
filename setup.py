@@ -42,7 +42,7 @@ setup(
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='luna',
-    name='luna',
+    name='lunar_halo',
     packages=find_packages(),
     setup_requires=setup_requirements,
     test_suite='tests',
