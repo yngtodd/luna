@@ -25,5 +25,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: yngtodd/luna
+    repo: yngtodd/lunar_halo
     python: 3.8
