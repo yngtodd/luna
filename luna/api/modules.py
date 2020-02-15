@@ -8,7 +8,11 @@ class HaloModule(nn.Module):
     Halo modules should subclass this class.
     """
 
-    def __init__(self):
+    __constants__ = ['halo_size']
+
+    def __init__(self, halo_size: int):
         super(HaloModule, self).__init__()
+        self.halo_size = halo_size
+
         self._rrefs = []
         self._neighbors = OrderedDict()
