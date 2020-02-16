@@ -22,11 +22,11 @@ class Halo1d(HaloModule):
     def __init__(self, halo_size: int, model: nn.Module, rank: int):
         super(Halo1D, self).__init__(halo_size)
         self.rank = rank
-        self.left_rank = rank - 1 if rank > 0 else None
-        self.right_rank = rank + 1 if rank < num_workers - 1 else None
+        self.model = model
 
         self.halo_pad = nn.ConstantPad1d(halo_size, 0)
-        self.model = model
+        self.left_rank = rank - 1 if rank > 0 else None
+        self.right_rank = rank + 1 if rank < num_workers - 1 else None
 
     def get_left_halo(self, x: RRef):
         """ Get the halo region from left neighbor
