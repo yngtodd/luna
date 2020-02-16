@@ -5,7 +5,7 @@ from luna.api.modules import HaloModule
 from luna.rpc import _remote_method
 
 
-class Halo1D(HaloModule):
+class Halo1d(HaloModule):
     r"""One dimensional halo
 
     This will orchestra halo regions to be passed
