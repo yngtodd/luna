@@ -44,7 +44,7 @@ class Halo1d(HaloModule):
             x: rref to a tensor
         """
         tensor = x#.local_value()
-        return value[..., -self.halo_size:]
+        return tensor[..., -self.halo_size:]
 
     def forward(self, x_refs):
         """ Compute over a subdomain """

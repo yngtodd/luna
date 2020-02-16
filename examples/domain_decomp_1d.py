@@ -33,7 +33,7 @@ class RandomDataset(Dataset):
 class Trainer:
 
     def __init__(self, dataset, num_workers=2, batch_size=8):
-        halo_conv = Halo1d(1, ConvBlock1d(), num_workers, rank)
+        halo_conv = Halo1d(2, ConvBlock1d(), num_workers, rank)
         workers = [f'worker{i}' for i in range(num_workers)]
 
         self.model = DomainDecompConv(halo_conv, workers, 10)
