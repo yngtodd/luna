@@ -34,7 +34,7 @@ class Halo1d(HaloModule):
         Args:
             x: rref to a tensor
         """
-        tensor = x.local_value()
+        tensor = x#.local_value()
         return tensor[..., :self.halo_size]
 
     def get_right_halo(self, x: RRef):
@@ -43,7 +43,7 @@ class Halo1d(HaloModule):
         Args:
             x: rref to a tensor
         """
-        tensor = x.local_value()
+        tensor = x#.local_value()
         return value[..., -self.halo_size:]
 
     def forward(self, x_refs):

@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torch.distributed import rpc
 
 from luna.rpc import _remote_method
+from luna.nn.halo import Halo1d
 
 
 def max_element(x):
@@ -35,7 +36,7 @@ class DomainDecompConv(nn.Module):
         self.fc = nn.Linear(128, num_labels)
 
     def forward(self, x_refs):
-        x_refs = [_remote_method(model.forward, x_refs) for model in self.models]
+        x_refs = [_remote_method(Halo1d.forward, model, x_refs) for model in self.models]
         maxes = [rpc.rpc_async(x.owner(), max_element, args=[x]) for x in x_refs]
         maxes = [m.wait() for m in maxes]
         maxes, _ = torch.max(torch.cat(maxs, dim=-1), dim=-1)
