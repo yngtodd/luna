@@ -19,8 +19,8 @@ class Halo1d(HaloModule):
                subdomain
     """
 
-    def __init__(self, halo_size: int, model: nn.Module, rank: int):
-        super(Halo1D, self).__init__(halo_size)
+    def __init__(self, halo_size, model, num_workers, rank):
+        super(Halo1d, self).__init__(halo_size)
         self.rank = rank
         self.model = model
 

@@ -17,7 +17,7 @@ class ConvBlock1d(nn.Module):
     """ Simple 1D convolution """
 
     def __init__(self):
-        super(ConvBlock1D, self).__init__()
+        super(ConvBlock1d, self).__init__()
         self.conv1 = nn.Conv1d(3, 64, 3)
         self.conv2 = nn.Conv1d(64, 128, 3)
 
@@ -29,6 +29,7 @@ class DomainDecompConv(nn.Module):
     """ 1D convolution via domain decomposition """
 
     def __init__(self, model, workers, num_labels):
+        super(DomainDecompConv, self).__init__()
         # initialize our workers
         self.models = [rpc.remote(w, deepcopy, args=(model,)) for w in workers]
         self.fc = nn.Linear(128, num_labels)
