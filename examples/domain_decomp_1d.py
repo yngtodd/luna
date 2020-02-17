@@ -33,7 +33,7 @@ class RandomDataset(Dataset):
 class Trainer:
 
     def __init__(self, dataset, num_workers=2, batch_size=8):
-        halo_conv = Halo1d(2, ConvBlock1d(), num_workers, rank)
+        halo_conv = Halo1d(1, ConvBlock1d(), num_workers, rank=rank)
         workers = [f'worker{i}' for i in range(num_workers)]
 
         self.model = DomainDecompConv(halo_conv, workers, 10)
@@ -49,6 +49,7 @@ class Trainer:
             itbar = self.dataloader
             itbar = tqdm(itbar, desc='iter')
             for X, Y in itbar:
+                print(f'X shape: {X.shape}')
                 self.optim.zero_grad()
                 # TODO chunk X and distribute to workers
                 tile_len = X.shape[-1] // num_workers

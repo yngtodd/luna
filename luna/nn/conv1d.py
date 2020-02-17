@@ -26,6 +26,19 @@ class ConvBlock1d(nn.Module):
         x = F.relu(self.conv2(F.relu(self.conv1(x))))
 
 
+class HaloConv1d(nn.Module):
+    """ Halo => ConvBlock """
+
+    def __init__(self, num_workers, rank):
+        self.halo = Halo1d(num_workers, rank)
+        self.conv = ConvBlock1d()
+
+    def forward(self, x_rrefs):
+        x = self.halo(x_rrefs)
+        x = self.conv(x)
+        return x
+
+
 class DomainDecompConv(nn.Module):
     """ 1D convolution via domain decomposition """
 
@@ -37,6 +50,8 @@ class DomainDecompConv(nn.Module):
 
     def forward(self, x_refs):
         x_refs = [_remote_method(Halo1d.forward, model, x_refs) for model in self.models]
+        xs = [x.to_here() for x in x_refs]
+        print(f'Xs: {xs}')
         maxes = [rpc.rpc_async(x.owner(), max_element, args=[x]) for x in x_refs]
         maxes = [m.wait() for m in maxes]
         maxes, _ = torch.max(torch.cat(maxs, dim=-1), dim=-1)

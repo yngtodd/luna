@@ -1,4 +1,5 @@
 import torch.nn as nn
+from torch.distributed import rpc
 from torch.distributed.rpc import RRef
 
 from luna.api.modules import HaloModule
@@ -49,16 +50,29 @@ class Halo1d(HaloModule):
     def forward(self, x_refs):
         """ Compute over a subdomain """
         # Get the subdomain that we need
+        print(f'Rank: {self.rank}')
+        if self.rank == 2:
+            return 0
         x = x_refs[self.rank].to_here()
         # pad zeros of halo_size on both sides
+        print(f'x shape: {x.shape}')
         padded = self.halo_pad(x)
+        print(f'padded shape : {padded.shape}')
 
-        if self.left_rank is not None:
-            left_halo = _remote_method(self.get_left_halo, x_refs[self.rank])
-            padded[..., :self.halo_size] = left_halo
+        if self.left_rank is None:
+            left_halo = 0
+        else:
+            left_halo = _remote_method(self.get_right_halo, x_refs[self.left_rank])
+            #left_halo = rpc.rpc_sync(x_refs[self.left_rank].owner(),
+            #    self.get_right_halo, args=(x_refs[self.left_rank]))
 
-        if self.right_rank is not None:
-            right_halo = _remote_method(self.get_right_halo, x_refs[self.rank])
-            padded[..., -self.halo_size:] = right_halo
+        if self.right_rank is None:
+            right_halo = 0
+        else:
+            right_halo = _remote_method(self.get_left_halo, x_refs[self.rank])
+
+        padded[..., :self.halo_size] = left_halo
+        padded[..., -self.halo_size:] = right_halo
+        print(f'padded shape 2: {padded.shape}')
 
         return self.model(padded)
