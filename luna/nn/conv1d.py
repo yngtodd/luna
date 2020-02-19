@@ -8,12 +8,6 @@ from luna.rpc import _remote_method
 from luna.nn.halo import Halo1d
 
 
-def max_element(x):
-    """ Helper function to apply max pool on RRefs """
-    return F.adaptive_max_pool1d(
-        x.local_value(), 1, return_indices=False)
-
-
 class ConvBlock1d(nn.Module):
     """ Simple 1D convolution """
 
@@ -29,30 +23,15 @@ class ConvBlock1d(nn.Module):
 class HaloConv1d(nn.Module):
     """ Halo => ConvBlock """
 
-    def __init__(self, num_workers, rank):
-        self.halo = Halo1d(num_workers, rank)
+    def __init__(self, halo_size, num_workers, rank):
+        super(HaloConv1d, self).__init__()
+        self.halo = Halo1d(halo_size, num_workers, rank)
         self.conv = ConvBlock1d()
 
     def forward(self, x_rrefs):
+        print(f'x_rrefs: {x_rrefs}')
         x = self.halo(x_rrefs)
+        print(f'Input conv: {x.shape}')
         x = self.conv(x)
         return x
 
-
-class DomainDecompConv(nn.Module):
-    """ 1D convolution via domain decomposition """
-
-    def __init__(self, model, workers, num_labels):
-        super(DomainDecompConv, self).__init__()
-        # initialize our workers
-        self.models = [rpc.remote(w, deepcopy, args=(model,)) for w in workers]
-        self.fc = nn.Linear(128, num_labels)
-
-    def forward(self, x_refs):
-        x_refs = [_remote_method(Halo1d.forward, model, x_refs) for model in self.models]
-        xs = [x.to_here() for x in x_refs]
-        print(f'Xs: {xs}')
-        maxes = [rpc.rpc_async(x.owner(), max_element, args=[x]) for x in x_refs]
-        maxes = [m.wait() for m in maxes]
-        maxes, _ = torch.max(torch.cat(maxs, dim=-1), dim=-1)
-        return self.fc(maxes)

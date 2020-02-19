@@ -6,9 +6,8 @@ from torch import optim
 from torch.distributed import rpc
 from torch.utils.data import DataLoader, Dataset
 
-from luna.nn.halo import Halo1d
 from luna.rpc.env import Env
-from luna.nn.conv1d import ConvBlock1d, DomainDecompConv
+from luna.nn.domain_decomposition import DomainDecomp1d
 
 
 rank = int(os.environ.get('RANK'))
@@ -32,11 +31,8 @@ class RandomDataset(Dataset):
 
 class Trainer:
 
-    def __init__(self, dataset, num_workers=2, batch_size=8):
-        halo_conv = Halo1d(1, ConvBlock1d(), num_workers, rank=rank)
-        workers = [f'worker{i}' for i in range(num_workers)]
-
-        self.model = DomainDecompConv(halo_conv, workers, 10)
+    def __init__(self, dataset, halo_size=1, num_workers=2, batch_size=8):
+        self.model = DomainDecomp1d(halo_size, num_workers, rank, 10)
        
         self.dataloader = DataLoader(
             dataset, num_workers=2, batch_size=batch_size, shuffle=True
