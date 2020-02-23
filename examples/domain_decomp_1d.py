@@ -14,6 +14,7 @@ rank = int(os.environ.get('RANK'))
 world_size = int(os.environ.get('WORLD_SIZE'))
 num_workers = world_size - 1
 
+
 if rank == world_size - 1:
     rank_name = 'master'
 else:
@@ -37,6 +38,7 @@ class Trainer:
         self.dataloader = DataLoader(
             dataset, num_workers=2, batch_size=batch_size, shuffle=True
         )
+
         self.optim = optim.SGD(self.model.parameters(), lr=1e-3)
         self.criterion = torch.nn.CrossEntropyLoss()
 
