@@ -28,7 +28,9 @@ class DomainDecomp1d(nn.Module):
         self.fc = nn.Linear(128, num_labels)
 
     def forward(self, x_refs):
-        x_refs = [_remote_method(HaloConv1d.forward, conv, x_refs) for conv in self.halo_conv_rrefs]
+        x = x_refs[0].to_here()
+        print(f'x: {x.shape}')
+        x_refs = [_remote_method(HaloConv1d.forward, x_refs) for conv in self.halo_conv_rrefs]
         xs = [x.to_here() for x in x_refs]
         print(f'Xs: {xs}')
         maxes = [rpc.rpc_async(x.owner(), max_element, args=[x]) for x in x_refs]

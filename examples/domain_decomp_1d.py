@@ -50,6 +50,10 @@ class Trainer:
                 # TODO chunk X and distribute to workers
                 tile_len = X.shape[-1] // num_workers
                 # this is a pretty inefficient way to do things
+                print(f'Num workers: {num_workers}')
+                chunks = [X[..., tile_len * i : tile_len * (i+1)] for i in range(num_workers)]
+                print(f'Chunk 0: {chunks[0].shape}')
+
                 chunks = [rpc.RRef(
                         X[..., tile_len * i : tile_len * (i+1)],
                     ) for i in range(world_size)]
